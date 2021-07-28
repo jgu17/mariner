@@ -1,0 +1,53 @@
+ARG FROM=debian:bullseye-slim
+FROM ${FROM} as base-image
+LABEL maintainer="pete@port.direct"
+
+SHELL ["bash", "-exc"]
+ARG DEBIAN_FRONTEND=noninteractive
+
+FROM base-image as CBL-Mariner-dev
+
+RUN apt-get update ;\
+    apt-get -y install \
+        cpio \
+        parted \
+        make \
+        tar \
+        wget \
+        curl \
+        rpm \
+        qemu-utils \
+        golang-1.15-go \
+        genisoimage \
+        bison \
+        gawk \
+        pigz \
+        git \
+        sudo \
+        dosfstools \
+        e2fsprogs \
+        gnupg2 ;\
+    ln -vsf /usr/lib/go-1.15/bin/go /usr/bin/go
+
+ENV MARINER_BRANCH 1.0-stable
+RUN git clone https://github.com/microsoft/CBL-Mariner.git
+
+FROM CBL-Mariner-dev as CBL-Mariner-tools
+CMD rm .dockerenv ;\
+    pushd CBL-Mariner ;\
+    git pull ;\
+    popd ;\
+    pushd CBL-Mariner/toolkit ;\
+    git checkout $MARINER_BRANCH ;\
+    sudo make package-toolkit REBUILD_TOOLS=y ;\
+    popd ;\
+    ls -lah CBL-Mariner/out/toolkit-*.tar.gz
+
+FROM CBL-Mariner-dev as CBL-Mariner-builder
+COPY . /opt/mariner
+RUN pushd /opt/mariner ;\
+    tar -xzvf toolkit.tar.gz ;\
+    popd
+CMD rm .dockerenv ;\
+    pushd /opt/mariner/toolkit ;\
+    sudo make image CONFIG_FILE=../imageconfigs/demo_vhd.json 

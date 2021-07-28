@@ -1,0 +1,60 @@
+
+apiVersion: kubevirt.io/v1alpha3
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-mariner
+  name: vm-mariner
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-mariner
+    spec:
+      domain:
+        clock:
+          utc: {}
+          timer:
+            kvm: {}
+        cpu:
+          model: host-passthrough
+          sockets: 1
+          cores: 4
+          threads: 1
+          dedicatedCpuPlacement: true
+          isolateEmulatorThread: true
+        # firmware:
+        #   bootloader:
+        #     efi:
+        #       secureBoot: false
+        resources:
+          requests:
+            memory: 16Gi
+          limits:
+            memory: 16Gi
+        memory:
+          hugepages:
+            pageSize: "1Gi"
+        devices:
+          disks:
+            - name: boot-disk
+              disk:
+                bus: virtio
+                pciAddress: "0000:03:00.0"
+          interfaces:
+            - name: default
+              bridge: {}
+              pciAddress: "0000:09:00.0"
+              ports:
+                - name: ssh
+                  port: 22
+      volumes:
+        - name: boot-disk
+          persistentVolumeClaim:
+            claimName: mariner-vm-disk
+      networks:
+        - name: default
+          pod: {}
+# FROM scratch
+# ADD --chown=107:107 https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img /disk/
