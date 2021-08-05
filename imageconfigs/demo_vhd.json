@@ -2,7 +2,7 @@
     "Disks": [
         {
             "PartitionTableType": "gpt",
-            "MaxSize": 2048,
+            "MaxSize": 4096,
             "Artifacts": [
                 {
                     "Name": "demo",
@@ -13,7 +13,8 @@
                 {
                     "ID": "boot",
                     "Flags": [
-                        "grub"
+                        "esp",
+                        "boot"
                     ],
                     "Start": 1,
                     "End": 9,
@@ -31,11 +32,12 @@
     "SystemConfigs": [
         {
             "Name": "Standard",
-            "BootType": "legacy",
+            "BootType": "efi",
             "PartitionSettings": [
                 {
                     "ID": "boot",
-                    "MountPoint": ""
+                    "MountPoint": "/boot/efi",
+                    "MountOptions" : "umask=0077"
                 },
                 {
                     "ID": "rootfs",
@@ -43,11 +45,17 @@
                 }
             ],
             "PackageLists": [
-                "demo_package_lists/core-packages.json",
-                "demo_package_lists/demo-packages.json"
+                "package_lists/core-packages.json",
+                "package_lists/fips.json",
+                "package_lists/demo-packages.json",
+                "package_lists/container-packages.json",
+                "package_lists/uefi-bootloader-packages.json"
             ],
             "KernelOptions": {
                 "default": "kernel"
+            },
+            "KernelCommandLine": {
+                "ExtraCommandLine": "console=ttyS0"
             },
             "Hostname": "demo",
             "Users": [

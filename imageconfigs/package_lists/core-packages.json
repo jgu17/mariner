@@ -1,6 +1,12 @@
 {
     "packages": [
+        "ca-certificates",
         "core-packages-base-image",
+        "cloud-init",
+        "cloud-utils-growpart",
+        "dhcp-client",
+        "hyperv-daemons",
+        "openssh-server",
         "initramfs"
     ],
     "_comment": "Install 'initramfs' last to avoid unnecessary regeneration when other packages, such as 'kernel', are installed."

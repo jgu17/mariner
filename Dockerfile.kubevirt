@@ -1,0 +1,7 @@
+ARG FROM=scratch
+FROM ${FROM} as base-image
+LABEL maintainer="pete@port.direct"
+
+ADD --chown=107:107 ./mariner.img /disk/
+ADD --chown=107:107 initrd /boot/initrd
+ADD --chown=107:107 vmlinuz /boot/vmlinuz

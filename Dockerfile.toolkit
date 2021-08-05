@@ -48,6 +48,7 @@ COPY . /opt/mariner
 RUN pushd /opt/mariner ;\
     tar -xzvf toolkit.tar.gz ;\
     popd
+
 CMD rm .dockerenv ;\
     pushd /opt/mariner/toolkit ;\
-    sudo make image CONFIG_FILE=../imageconfigs/demo_vhd.json 
+    sudo make image CONFIG_FILE=../imageconfigs/${image_target}.json 

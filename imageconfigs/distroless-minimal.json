@@ -1,0 +1,21 @@
+{
+    "Disks": [
+        {
+            "Artifacts": [
+                {
+                    "Name": "distroless-minimal",
+                    "Compression": "tar.gz"
+                }
+            ]
+        }
+    ],
+    "SystemConfigs": [
+        {
+            "Name": "Standard",
+            "PackageLists": [
+                "package_lists/distroless-packages-container-minimal.json"
+            ],
+            "RemoveRpmDb": true
+        }
+    ]
+}

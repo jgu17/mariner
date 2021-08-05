@@ -1,4 +1,16 @@
 
+# vm-mariner should be replaced by instance uuid
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vm-mariner-cloudinit-userdata
+type: Opaque
+stringData:
+  userdata: |
+    #cloud-config
+    password: password1
+    chpasswd: { expire: False }
+---
 apiVersion: kubevirt.io/v1alpha3
 kind: VirtualMachine
 metadata:
@@ -24,10 +36,17 @@ spec:
           threads: 1
           dedicatedCpuPlacement: true
           isolateEmulatorThread: true
-        # firmware:
-        #   bootloader:
-        #     efi:
-        #       secureBoot: false
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+          kernelBoot:
+            container:
+              image: quay.io/port/mariner-kubevirt:latest
+              initrdPath: /boot/initrd
+              kernelPath: /boot/vmlinuz
+              imagePullPolicy: Always
+            kernelArgs: console=tty1 console=ttyS0
         resources:
           requests:
             memory: 16Gi
@@ -37,11 +56,17 @@ spec:
           hugepages:
             pageSize: "1Gi"
         devices:
+          autoattachGraphicsDevice: false
           disks:
             - name: boot-disk
               disk:
                 bus: virtio
                 pciAddress: "0000:03:00.0"
+            - name: cloud-init-disk
+              disk:
+                bus: virtio
+                pciAddress: "0000:04:00.0"
+                readonly: true
           interfaces:
             - name: default
               bridge: {}
@@ -51,10 +76,29 @@ spec:
                   port: 22
       volumes:
         - name: boot-disk
-          persistentVolumeClaim:
-            claimName: mariner-vm-disk
+          dataVolume:
+            name: boot-disk
+        - name: cloud-init-disk
+          cloudInitNoCloud:
+            secretRef:
+              name: vm-mariner-cloudinit-userdata
       networks:
         - name: default
           pod: {}
+  dataVolumeTemplates:
+    - metadata:
+        name: boot-disk
+      spec:
+        pvc:
+          volumeMode: Block
+          storageClassName: rook-ceph-ec-block
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+        source:
+          registry:
+            url: "docker://quay.io/port/mariner-kubevirt:latest"
 # FROM scratch
 # ADD --chown=107:107 https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img /disk/

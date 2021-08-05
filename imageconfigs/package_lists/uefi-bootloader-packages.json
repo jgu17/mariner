@@ -1,6 +1,6 @@
 {
     "packages": [
         "grub2-efi-binary",
-        "shim-unsigned"
+        "shim"
     ]
 }

@@ -1,0 +1,12 @@
+{
+    "packages": [
+        "moby-containerd",
+        "moby-cli",
+        "moby-engine",
+        "cni",
+        "cri-tools",
+        "conntrack-tools",
+        "ethtool",
+        "ipvsadm"
+    ]
+}
